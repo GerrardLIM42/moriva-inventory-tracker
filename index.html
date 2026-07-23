@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MORIVA 재고 트래커</title>
+<style>
+  :root {
+    --navy: #1B2A4A;
+    --navy-light: #2E4270;
+    --cream: #F7F4ED;
+    --gold: #C9A84C;
+    --ink: #1C1C1C;
+    --muted: #7B8194;
+    --up: #2F7D5C;
+    --down: #C0473C;
+    --border: #E4E1D8;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--cream);
+    color: var(--ink);
+    font-family: "Pretendard", -apple-system, "Malgun Gothic", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  header {
+    background: var(--navy);
+    color: var(--cream);
+    padding: 28px 32px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  header .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  header .brand .mark {
+    color: var(--gold);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+
+  header h1 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  header .updated {
+    font-size: 13px;
+    color: #B9C0D4;
+  }
+
+  main {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+  }
+
+  .summary-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .summary-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+
+  .summary-card .label {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .summary-card .value {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  thead th {
+    text-align: left;
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 600;
+    padding: 12px 16px;
+    background: #FBFAF6;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  tbody td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    vertical-align: top;
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+
+  .item-name {
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .vendor-id {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+
+  .sold-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .sold-up { background: rgba(47,125,92,0.12); color: var(--up); }
+  .sold-flat { background: rgba(123,129,148,0.12); color: var(--muted); }
+  .sold-na { color: var(--muted); font-size: 12px; }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+    font-size: 14px;
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    background: #fff;
+  }
+
+  .empty-state strong {
+    display: block;
+    color: var(--navy);
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+
+  footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <span class="mark">MORIVA</span>
+    <h1>재고 &amp; 판매량 트래커</h1>
+  </div>
+  <div class="updated" id="updated-label">데이터 불러오는 중...</div>
+</header>
+
+<main>
+  <div class="summary-row" id="summary-row"></div>
+  <div id="table-container">
+    <div class="empty-state">불러오는 중...</div>
+  </div>
+</main>
+
+<footer>매일 자정(KST) GitHub Actions로 자동 수집됩니다.</footer>
+
+<script>
+  // 이 저장소 안의 data/report-latest.json을 그대로 fetch
+  const REPORT_URL = "./data/report-latest.json";
+
+  function formatNumber(n) {
+    return typeof n === "number" ? n.toLocaleString("ko-KR") : "—";
+  }
+
+  function renderSummary(report) {
+    const totalItems = report.length;
+    const totalStock = report.reduce((sum, r) => sum + (typeof r.stockQuantity === "number" ? r.stockQuantity : 0), 0);
+    const totalSold = report.reduce((sum, r) => sum + (typeof r.estimatedSold === "number" ? r.estimatedSold : 0), 0);
+    const lowStock = report.filter((r) => typeof r.stockQuantity === "number" && r.stockQuantity <= 5).length;
+
+    const cards = [
+      { label: "추적 중인 옵션 수", value: formatNumber(totalItems) },
+      { label: "전체 재고 합계", value: formatNumber(totalStock) },
+      { label: "어제 대비 추정 판매", value: formatNumber(totalSold) + "개" },
+      { label: "재고 5개 이하", value: formatNumber(lowStock) },
+    ];
+
+    document.getElementById("summary-row").innerHTML = cards
+      .map((c) => `<div class="summary-card"><div class="label">${c.label}</div><div class="value">${c.value}</div></div>`)
+      .join("");
+  }
+
+  function renderTable(report) {
+    const container = document.getElementById("table-container");
+
+    if (!report.length) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <strong>아직 수집된 데이터가 없어요</strong>
+          GitHub Actions가 첫 실행되면 여기에 상품별 재고 현황이 표시됩니다.<br/>
+          Actions 탭에서 워크플로를 수동 실행(Run workflow)하면 바로 확인할 수 있어요.
+        </div>`;
+      return;
+    }
+
+    const rows = report
+      .map((r) => {
+        let soldBadge = `<span class="sold-na">비교 불가</span>`;
+        if (typeof r.estimatedSold === "number") {
+          soldBadge = r.estimatedSold > 0
+            ? `<span class="sold-badge sold-up">-${formatNumber(r.estimatedSold)}</span>`
+            : `<span class="sold-badge sold-flat">변동 없음</span>`;
+        }
+
+        return `
+          <tr>
+            <td>
+              <div class="item-name">${r.itemName ?? "(상품명 없음)"}</div>
+              <div class="vendor-id">vendorItemId: ${r.vendorItemId ?? "—"}</div>
+            </td>
+            <td class="num">${formatNumber(r.prevStock)}</td>
+            <td class="num">${formatNumber(r.stockQuantity)}</td>
+            <td class="num">${soldBadge}</td>
+            <td class="num">${typeof r.salePrice === "number" ? formatNumber(r.salePrice) + "원" : "—"}</td>
+          </tr>`;
+      })
+      .join("");
+
+    container.innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>상품 옵션</th>
+            <th class="num">어제 재고</th>
+            <th class="num">오늘 재고</th>
+            <th class="num">추정 판매</th>
+            <th class="num">판매가</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
+  async function init() {
+    try {
+      const res = await fetch(REPORT_URL, { cache: "no-store" });
+      if (!res.ok) throw new Error("리포트를 불러오지 못했습니다.");
+      const report = await res.json();
+
+      const latestDate = report[0]?.date;
+      document.getElementById("updated-label").textContent = latestDate
+        ? `기준일: ${latestDate}`
+        : "아직 데이터 없음";
+
+      renderSummary(report);
+      renderTable(report);
+    } catch (err) {
+      document.getElementById("updated-label").textContent = "불러오기 실패";
+      document.getElementById("table-container").innerHTML = `
+        <div class="empty-state">
+          <strong>데이터를 불러오지 못했어요</strong>
+          ${err.message}
+        </div>`;
+    }
+  }
+
+  init();
+</script>
+
+</body>
+</html>
