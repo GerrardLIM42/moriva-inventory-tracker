@@ -3,18 +3,12 @@
     "sellerProductId": 16336665347,
     "itemName": "화이트 2박스",
     "stockQuantity": 0,
-    "salePrice": null,
-    "prevStock": 0,
-    "estimatedSold": 0,
-    "date": "2026-08-19"
+    "salePrice": null
   },
   {
     "sellerProductId": 16336665347,
     "itemName": "화이트 1박스",
     "stockQuantity": 0,
-    "salePrice": null,
-    "prevStock": 0,
-    "estimatedSold": 0,
-    "date": "2026-08-19"
+    "salePrice": null
   }
 ]
