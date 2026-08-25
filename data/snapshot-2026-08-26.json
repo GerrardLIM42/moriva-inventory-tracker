@@ -3,36 +3,24 @@
     "sellerProductId": 16336665347,
     "itemName": "3박스 화이트",
     "stockQuantity": null,
-    "salePrice": null,
-    "prevStock": 0,
-    "estimatedSold": null,
-    "date": "2026-08-26"
+    "salePrice": null
   },
   {
     "sellerProductId": 16336665347,
     "itemName": "1박스 화이트",
     "stockQuantity": 0,
-    "salePrice": null,
-    "prevStock": 0,
-    "estimatedSold": 0,
-    "date": "2026-08-26"
+    "salePrice": null
   },
   {
     "sellerProductId": 16336665347,
     "itemName": "4박스 화이트",
     "stockQuantity": null,
-    "salePrice": null,
-    "prevStock": 0,
-    "estimatedSold": null,
-    "date": "2026-08-26"
+    "salePrice": null
   },
   {
     "sellerProductId": 16336665347,
     "itemName": "2박스 화이트",
     "stockQuantity": 0,
-    "salePrice": null,
-    "prevStock": 0,
-    "estimatedSold": 0,
-    "date": "2026-08-26"
+    "salePrice": null
   }
 ]
