@@ -6,7 +6,7 @@
     "salePrice": null,
     "prevStock": 0,
     "estimatedSold": null,
-    "date": "2026-10-20"
+    "date": "2026-10-21"
   },
   {
     "sellerProductId": 16336665347,
@@ -15,7 +15,7 @@
     "salePrice": null,
     "prevStock": 0,
     "estimatedSold": 0,
-    "date": "2026-10-20"
+    "date": "2026-10-21"
   },
   {
     "sellerProductId": 16336665347,
@@ -24,7 +24,7 @@
     "salePrice": null,
     "prevStock": 0,
     "estimatedSold": 0,
-    "date": "2026-10-20"
+    "date": "2026-10-21"
   },
   {
     "sellerProductId": 16336665347,
@@ -33,6 +33,6 @@
     "salePrice": null,
     "prevStock": 0,
     "estimatedSold": 0,
-    "date": "2026-10-20"
+    "date": "2026-10-21"
   }
 ]
